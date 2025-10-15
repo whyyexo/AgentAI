@@ -12,12 +12,11 @@ import { AnalyticsPage } from './components/AnalyticsPage';
 import { ProfilePage } from './components/ProfilePage';
 import { AIChatPage } from './components/AIChatPage';
 import { StudioPage } from './components/StudioPage';
-import { Agent, supabase } from './lib/supabase';
+import { Agent } from './lib/supabase';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
-  const [loading, setLoading] = useState(true);
+function AppContent() {
+  const { user, loading } = useAuth();
   const [activeView, setActiveView] = useState('agents');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -25,27 +24,8 @@ function App() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setUserEmail(session?.user?.email || '');
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsAuthenticated(!!session);
-    setUserEmail(session?.user?.email || '');
-    setLoading(false);
-  };
-
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setIsAuthenticated(false);
+    // This will be handled by the useAuth hook
     setActiveView('agents');
   };
 
@@ -81,8 +61,8 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <AuthPage onAuthSuccess={checkAuth} />;
+  if (!user) {
+    return <AuthPage onAuthSuccess={() => {}} />;
   }
 
   if (showInstructions && selectedAgent) {
@@ -93,7 +73,7 @@ function App() {
           onViewChange={setActiveView}
           onCreateAgent={handleCreateAgent}
           onSignOut={handleSignOut}
-          userEmail={userEmail}
+          userEmail={user.email || ''}
         />
         <div className="flex-1 overflow-auto">
           <AgentInstructionsPage
@@ -112,7 +92,7 @@ function App() {
         onViewChange={setActiveView}
         onCreateAgent={handleCreateAgent}
         onSignOut={handleSignOut}
-        userEmail={userEmail}
+        userEmail={user.email || ''}
       />
 
       <div className="flex-1 flex flex-col">
@@ -160,6 +140,14 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

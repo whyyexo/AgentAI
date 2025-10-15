@@ -1,4 +1,5 @@
 import { Bot, Plus, Settings, BarChart3, Zap, CreditCard, LogOut, User, MessageSquare, Layers } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 type SidebarProps = {
   activeView: string;
@@ -9,6 +10,12 @@ type SidebarProps = {
 };
 
 export function Sidebar({ activeView, onViewChange, onCreateAgent, onSignOut, userEmail }: SidebarProps) {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    onSignOut();
+  };
   const menuItems = [
     { id: 'agents', label: 'Agents', icon: Bot },
     { id: 'studio', label: 'Studio', icon: Layers },
@@ -66,7 +73,7 @@ export function Sidebar({ activeView, onViewChange, onCreateAgent, onSignOut, us
           <p className="text-sm text-white font-medium truncate">{userEmail || 'Guest'}</p>
         </div>
         <button
-          onClick={onSignOut}
+          onClick={handleSignOut}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white rounded-lg transition-colors text-sm font-medium"
         >
           <LogOut className="w-4 h-4" />
