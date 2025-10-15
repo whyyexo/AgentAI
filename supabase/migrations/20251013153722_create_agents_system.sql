@@ -1,4 +1,4 @@
-/*
+
   # Create AI Agents Platform Schema
 
   1. New Tables
