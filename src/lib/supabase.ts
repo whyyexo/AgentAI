@@ -63,6 +63,23 @@ export type UserSession = {
   created_at: string;
 };
 
+export type AgentInstructions = {
+  id: string;
+  agent_id: string;
+  instructions: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  agent_id: string;
+  user_id: string;
+  message: string;
+  is_from_user: boolean;
+  created_at: string;
+};
+
 // Auth helper functions
 export const authHelpers = {
   // Sign up with email and password

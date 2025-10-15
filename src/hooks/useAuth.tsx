@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     setLoading(true);
     try {
-      const { data, error } = await authHelpers.signUp(email, password, fullName);
+      const { error } = await authHelpers.signUp(email, password, fullName);
       
       if (error) {
         return { error };
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { data, error } = await authHelpers.signIn(email, password);
+      const { error } = await authHelpers.signIn(email, password);
       
       if (error) {
         return { error };
@@ -166,7 +166,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     incrementApiCalls,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

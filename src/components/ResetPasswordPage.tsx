@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bot, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+// import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 
 export function ResetPasswordPage() {
