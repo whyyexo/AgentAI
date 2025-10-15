@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { AgentsView } from './components/AgentsView';
@@ -14,6 +14,7 @@ import { AIChatPage } from './components/AIChatPage';
 import { StudioPage } from './components/StudioPage';
 import { Agent } from './lib/supabase';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { SessionDebug } from './components/SessionDebug';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -23,6 +24,34 @@ function AppContent() {
   const [showChat, setShowChat] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isAppReady, setIsAppReady] = useState(false);
+  const [viewTransitionLoading, setViewTransitionLoading] = useState(false);
+
+  // Gérer l'état de préparation de l'application
+  useEffect(() => {
+    if (!loading) {
+      // Petit délai pour éviter le flash de loading
+      const timer = setTimeout(() => {
+        setIsAppReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsAppReady(false);
+    }
+  }, [loading]);
+
+  // Gérer les transitions entre vues avec un loading optimisé
+  const handleViewChange = (newView: string) => {
+    if (newView !== activeView) {
+      setViewTransitionLoading(true);
+      setActiveView(newView);
+      
+      // Arrêter le loading de transition rapidement
+      setTimeout(() => {
+        setViewTransitionLoading(false);
+      }, 150);
+    }
+  };
 
   const handleSignOut = async () => {
     // This will be handled by the useAuth hook
@@ -53,7 +82,8 @@ function AppContent() {
     setRefreshKey(prev => prev + 1);
   };
 
-  if (loading) {
+  // Afficher le loading seulement si l'app n'est pas prête OU s'il y a une transition de vue
+  if (!isAppReady || viewTransitionLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -70,7 +100,7 @@ function AppContent() {
       <div className="min-h-screen bg-black flex">
         <Sidebar
           activeView={activeView}
-          onViewChange={setActiveView}
+          onViewChange={handleViewChange}
           onCreateAgent={handleCreateAgent}
           onSignOut={handleSignOut}
           userEmail={user.email || ''}
@@ -89,7 +119,7 @@ function AppContent() {
     <div className="min-h-screen bg-black flex">
       <Sidebar
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         onCreateAgent={handleCreateAgent}
         onSignOut={handleSignOut}
         userEmail={user.email || ''}
@@ -139,6 +169,8 @@ function AppContent() {
           }}
         />
       )}
+
+      <SessionDebug />
     </div>
   );
 }
